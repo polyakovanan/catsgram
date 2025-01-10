@@ -5,6 +5,7 @@ import ru.yandex.practicum.catsgram.exception.ConditionsNotMetException;
 import ru.yandex.practicum.catsgram.exception.NotFoundException;
 import ru.yandex.practicum.catsgram.model.Post;
 import ru.yandex.practicum.catsgram.model.User;
+import ru.yandex.practicum.catsgram.util.SortOrder;
 
 import java.time.Instant;
 import java.util.*;
@@ -19,8 +20,18 @@ public class PostService {
         this.userService = userService;
     }
 
-    public List<Post> findAll() {
-        return new ArrayList<>(posts.values());
+    public Optional<Post> findById(Long id) {
+        return posts.get(id) == null ? Optional.empty() : Optional.of(posts.get(id));
+    }
+
+    public List<Post> findAll(int from, int size, String sort) {
+        return posts.values().stream()
+                .sorted(SortOrder.from(sort) == SortOrder.ASCENDING ?
+                        Comparator.comparing(Post::getPostDate) :
+                        Comparator.comparing(Post::getPostDate).reversed())
+                .skip(from)
+                .limit(size)
+                .toList();
     }
 
     public Post create(Post post) {
