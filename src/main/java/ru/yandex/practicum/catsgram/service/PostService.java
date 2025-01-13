@@ -3,6 +3,7 @@ package ru.yandex.practicum.catsgram.service;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.catsgram.exception.ConditionsNotMetException;
 import ru.yandex.practicum.catsgram.exception.NotFoundException;
+import ru.yandex.practicum.catsgram.exception.ParameterNotValidException;
 import ru.yandex.practicum.catsgram.model.Post;
 import ru.yandex.practicum.catsgram.model.User;
 import ru.yandex.practicum.catsgram.util.SortOrder;
@@ -25,6 +26,17 @@ public class PostService {
     }
 
     public List<Post> findAll(int from, int size, String sort) {
+        SortOrder sortOrder = SortOrder.from(sort);
+        if (sortOrder == null) {
+            throw new ParameterNotValidException("sort", "Получено: " + sort + " должно быть: ask или desc");
+        }
+        if (size <= 0) {
+            throw new ParameterNotValidException("size", "Размер должен быть больше нуля");
+        }
+        if (from < 0) {
+            throw new ParameterNotValidException("from", "Начало выборки должно быть положительным числом");
+        }
+
         return posts.values().stream()
                 .sorted(SortOrder.from(sort) == SortOrder.ASCENDING ?
                         Comparator.comparing(Post::getPostDate) :
